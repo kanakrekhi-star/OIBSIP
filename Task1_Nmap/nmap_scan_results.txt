@@ -1,0 +1,197 @@
+OIBSIP Cyber Security Internship
+Task 1 - Basic Network Scanning with Nmap
+
+==================================================
+TARGET INFORMATION
+==================================================
+
+Target IP: 192.168.0.103
+Target: My own Windows computer
+Scanner: Kali Linux running through WSL
+Tool: Nmap 7.99
+
+Authorization:
+The target system belongs to me and was scanned for
+educational and internship purposes only.
+
+==================================================
+1. BASIC SCAN
+==================================================
+
+Command:
+nmap -Pn 192.168.0.103
+
+Result:
+
+Nmap scan report for 192.168.0.103
+Host is up.
+All 1000 scanned ports on 192.168.0.103 are in ignored states.
+Not shown: 1000 filtered tcp ports (no-response)
+
+Nmap result:
+- Host was detected as up.
+- 1000 TCP ports were scanned.
+- 1000 ports were reported as filtered.
+- No open TCP ports were identified by this scan.
+
+Interpretation:
+The target computer was reachable, but Nmap did not
+receive responses from the scanned TCP ports. The ports
+were therefore classified as filtered. This can happen
+when firewall or network filtering prevents Nmap from
+determining whether the ports are open or closed.
+
+==================================================
+2. SERVICE VERSION SCAN
+==================================================
+
+Command:
+nmap -Pn -sV 192.168.0.103
+
+Result:
+
+Nmap scan report for 192.168.0.103
+Host is up.
+All 1000 scanned ports on 192.168.0.103 are in ignored states.
+Not shown: 1000 filtered tcp ports (no-response)
+
+Service detection performed.
+
+Nmap result:
+- Host was detected as up.
+- 1000 TCP ports were scanned.
+- 1000 ports were filtered.
+- No service or version could be identified.
+
+Interpretation:
+Because all scanned ports were filtered, Nmap could not
+connect to a service and therefore could not determine
+the service name or version.
+
+==================================================
+3. OS DETECTION SCAN
+==================================================
+
+Command:
+sudo nmap -Pn -O 192.168.0.103
+
+Result:
+
+Nmap scan report for 192.168.0.103
+Host is up.
+All 1000 scanned ports on 192.168.0.103 are in ignored states.
+Not shown: 1000 filtered tcp ports (no-response)
+
+Warning:
+OSScan results may be unreliable because Nmap could not
+find at least one open and one closed port.
+
+Nmap generated several aggressive OS guesses, including
+Microsoft Windows and Linux systems.
+
+No exact OS match was found.
+
+Nmap result:
+- Host was detected as up.
+- 1000 TCP ports were filtered.
+- OS detection was inconclusive.
+- Nmap explicitly stated that the OS results may be unreliable.
+
+Interpretation:
+OS detection normally works better when Nmap can examine
+the behavior of both open and closed ports. Since all
+scanned ports were filtered, the required conditions were
+not available and Nmap could not confidently identify
+the operating system.
+
+==================================================
+4. OPEN PORT AND SERVICE ANALYSIS
+==================================================
+
+Confirmed open ports from the required Kali terminal scans:
+
+None.
+
+The required terminal scans did not confirm any open TCP
+ports because all 1000 scanned ports were classified as
+filtered.
+
+Therefore, no service can be confidently assigned to an
+open port from these scans.
+
+==================================================
+5. SECURITY ANALYSIS
+==================================================
+
+Finding:
+All 1000 scanned TCP ports were filtered.
+
+Security impact:
+This indicates that network filtering or firewall rules
+are preventing Nmap from receiving responses from the
+scanned ports. This can reduce exposure to unsolicited
+network connections and makes service enumeration more
+difficult.
+
+However, filtered ports should not automatically be
+considered completely secure. A service could potentially
+exist behind firewall rules or be accessible through
+another network interface, port, or protocol.
+
+Finding:
+Service version detection did not identify any service.
+
+Security impact:
+No service version information was exposed during the
+scan, which limits the amount of information available to
+a scanner.
+
+Finding:
+OS detection was inconclusive.
+
+Security impact:
+The filtering prevented Nmap from collecting enough
+network behavior to make a reliable OS identification.
+
+==================================================
+6. ADDITIONAL ZENMAP OBSERVATION
+==================================================
+
+An earlier Zenmap scan of the same authorized Windows
+computer produced different results and reported:
+
+135/tcp  open  msrpc
+139/tcp  open  netbios-ssn
+445/tcp  open  microsoft-ds
+
+The same scan identified the operating system as:
+
+Microsoft Windows 11
+OS details: Microsoft Windows 11 24H2 - 25H2
+
+These results came from a different Zenmap scan
+configuration and are therefore kept separate from the
+required Kali terminal scan results.
+
+The required terminal scans are treated as the primary
+results for this task.
+
+==================================================
+7. CONCLUSION
+==================================================
+
+The Nmap assessment successfully confirmed that the target
+Windows computer was online and reachable.
+
+The required scans showed that all 1000 tested TCP ports
+were filtered. As a result, no open TCP ports or service
+versions could be confirmed through the Kali terminal
+scans, and OS detection was inconclusive.
+
+The results demonstrate the importance of firewall and
+network filtering in reducing information exposure during
+network reconnaissance.
+
+==================================================
+END OF REPORT
+==================================================
