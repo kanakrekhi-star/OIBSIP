@@ -1,210 +1,209 @@
-# Task 3 - SQL Injection on DVWA
+Project Overview
+This project demonstrates a classic SQL Injection vulnerability using Damn Vulnerable Web Application (DVWA) running locally on a Kali Linux system. The purpose is to understand how SQL Injection attacks work and how to prevent them.
 
-## Objective
+Environment Setup
+System Requirements
+Operating System: Kali Linux (or Windows with XAMPP)
 
-The objective of this task was to demonstrate a classic SQL Injection
-vulnerability using Damn Vulnerable Web Application (DVWA).
+Web Server: Nginx (or Apache with XAMPP)
 
-The testing was performed only on a locally installed DVWA instance
-running on Kali Linux.
+Database: MariaDB (or MySQL)
 
----
+Application: DVWA (Damn Vulnerable Web Application)
 
-## Tools and Technologies
+Installation Steps
+Install LAMP/XAMPP Stack
 
-- Kali Linux
-- DVWA (Damn Vulnerable Web Application)
-- Nginx
-- PHP
-- MariaDB
-- Web Browser
-- Terminal
+For Kali Linux: sudo apt install apache2 mariadb-server php php-mysql
 
----
+For Windows: Download and install XAMPP from apachefriends.org
 
-## 1. DVWA Installation and Configuration
+Download and Configure DVWA
 
-DVWA was installed and configured locally on Kali Linux.
+bash
+cd /var/www/html
+sudo git clone https://github.com/digininja/DVWA.git
+cd DVWA/config
+sudo cp config.inc.php.dist config.inc.php
+Database Setup
 
-The required web application components were configured, including
-PHP, MariaDB, and the DVWA service.
+Open http://localhost/DVWA/setup.php in browser
 
-The DVWA database was initialized before testing.
+Click "Create/Reset Database"
 
-The DVWA application was then started locally and accessed through the
-local web server.
+Default credentials: admin/password
 
-The default DVWA login was used to access the application.
+Start Services
 
----
+Kali: sudo systemctl start apache2 mariadb
 
-## 2. DVWA Security Level
+Windows: Start Apache and MySQL via XAMPP Control Panel
 
-After logging into DVWA, the security level was set to:
+SQL Injection Demonstration
+Security Level Configuration
+The DVWA security level was set to Low for this demonstration to expose the vulnerability intentionally.
 
-```text
-Low
+Test 1: Basic SQL Injection
+Payload: ' OR '1'='1
 
-3. SQL Injection Module
+What It Does:
 
-The SQL Injection module was opened from the DVWA web interface.
+The condition '1'='1' is always TRUE
 
-The module contains an input field where a User ID can normally be
-entered.
+This modifies the SQL query to return ALL records instead of just one
 
-Under normal conditions, the application should use the supplied User
-ID to retrieve the corresponding database record.
+SQL Query Breakdown:
 
-4. SQL Injection Payload 1
-Payload
-' OR '1'='1
-Explanation
-
-The expression:
-
-'1'='1'
-
-is always TRUE.
-
-At the Low security level, DVWA does not properly protect the user
-input before using it in the SQL query. Therefore, the injected input
-can change the logic of the original SQL query.
-
-Result
-
-The injection caused multiple database records to be returned instead
-of only the expected record.
-
-The displayed information included:
-
-User ID
-First Name
-Surname
-Screenshot
-
-5. SQL Injection Payload 2
-Payload
-' OR 1=1 #
-Explanation
-
-The expression:
-
-1=1
-
-is always TRUE.
-
-The # character is a MySQL/MariaDB comment marker. It causes the
-remaining part of the original SQL statement to be treated as a
-comment.
-
-This can allow the injected condition to change the query logic.
-
-Result
-
-The second SQL Injection test was performed successfully on the local
-DVWA application.
-
-The actual output obtained during testing is shown in the following
-screenshot.
-
-Screenshot
-
-6. What Data Was Exposed?
-
-The successful SQL Injection demonstrated that the application could
-return database records that were not intended to be returned for a
-single User ID.
-
-The displayed information included:
+text
+Original: SELECT * FROM users WHERE id = '1';
+Modified: SELECT * FROM users WHERE id = '' OR '1'='1';
+Results: Exposed multiple database records including:
 
 User IDs
+
 First Names
+
 Surnames
 
-This demonstrated that the SQL query could be manipulated through
-untrusted user input.
+Test 2: Comment-Based Injection
+Payload: ' OR 1=1 #
 
-7. What Is SQL Injection?
+What It Does:
 
-SQL Injection is a web application vulnerability that occurs when
-untrusted user input is directly included in an SQL query.
+1=1 is always TRUE
 
-Instead of being treated only as data, the input can be interpreted as
-part of the SQL command.
+# comments out the rest of the SQL query
 
-This can allow an attacker to manipulate the intended query and
-potentially access or modify database information.
+This effectively changes the query logic
 
-8. Why Did the Payload Work?
+SQL Query Breakdown:
 
-The payload worked because the application at DVWA's Low security level
-does not properly protect the input before using it in the SQL query.
+text
+Original: SELECT * FROM users WHERE id = '1';
+Modified: SELECT * FROM users WHERE id = '' OR 1=1 #';
+Results: Same as Test 1 - exposed user records from the database
 
-For example:
+What is SQL Injection?
+SQL Injection is a web application security vulnerability that occurs when untrusted user input is directly inserted into SQL queries without proper sanitization.
 
-' OR '1'='1
+How It Works
+User submits input through a web form
 
-contains a condition that is always TRUE.
+Application builds SQL query using this input
 
-Similarly:
+Attacker adds SQL code within the input
 
-' OR 1=1 #
+Database executes malicious code
 
-uses an always-true condition and a SQL comment.
+Real-World Impact
+Data Theft: Steal sensitive information
 
-This changes the intended logic of the query.
+Data Manipulation: Modify or delete database records
 
-9. How to Prevent SQL Injection
+Authorization Bypass: Access restricted areas
 
-Developers should never directly concatenate untrusted user input into
-SQL statements.
+Server Compromise: In some cases, execute system commands
 
-The recommended solution is to use:
+Why Did the Payload Work?
+The payload worked because:
 
-Parameterized queries
-Prepared statements
-Input validation
-Least-privilege database accounts
-Safe error handling
+No Input Validation: The application accepts any user input
 
-A vulnerable query may conceptually look like:
+Direct Concatenation: Input is directly placed into SQL query
 
-SELECT * FROM users WHERE id = '$user_input';
+No Parameterization: Input is treated as code, not data
 
-A safer approach is:
+Error Disclosure: Error messages reveal database structure
 
-SELECT * FROM users WHERE id = ?;
+Vulnerable Code Example
+php
+// VULNERABLE - DO NOT USE
+$user_id = $_GET['id'];
+$query = "SELECT * FROM users WHERE id = '$user_id'";
+Prevention: How to Fix SQL Injection
+Method 1: Parameterized Queries (Prepared Statements)
+PHP (MySQLi):
 
-The user input is supplied separately as a parameter.
+php
+// SAFE - Use prepared statements
+$stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+PHP (PDO):
 
-This ensures that input such as:
+php
+// SAFE - Use prepared statements
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id");
+$stmt->execute(['id' => $user_id]);
+Method 2: Input Validation
+php
+// SAFE - Validate input type
+if (filter_var($user_id, FILTER_VALIDATE_INT)) {
+    // Proceed with query
+}
+Method 3: Escape User Input
+php
+// SAFE - Escape special characters
+$user_id = mysqli_real_escape_string($conn, $_GET['id']);
+Method 4: Least Privilege Principle
+Database accounts should have minimal necessary permissions
 
-' OR 1=1 #
+Read-only for viewing operations
 
-is treated as data instead of being interpreted as SQL syntax.
+No direct database access for web applications
 
-Prepared statements therefore prevent user input from changing the
-structure of the SQL query.
+Security Best Practices
+Always Use Parameterized Queries: Never concatenate user input
 
-10. Evidence
+Validate All Input: Check data type, format, and size
 
-The following screenshots document the two SQL Injection tests:
+Use Secure Database Credentials: Avoid default passwords
 
-01_sql_injection_payload1.png
-<img width="929" height="436" alt="01_sql_injection_basic" src="https://github.com/user-attachments/assets/5269bf80-6591-4e86-b1be-ba2e5ac78856" />
+Hide Error Details: Don't expose database structure
 
-02_sql_injection_payload2.png
-<img width="664" height="439" alt="02_sql_injection_payload2" src="https://github.com/user-attachments/assets/28716e0e-2782-4e9f-b426-0f18ad2e36b8" />
+Implement Web Application Firewall (WAF): Additional protection layer
 
+Regular Security Audits: Test for vulnerabilities
 
-Detailed payload testing and analysis are available in:
+Keep Software Updated: Patch known vulnerabilities
 
-sql_injection_notes.md
+Test Environment Details
+Testing Platform: Local DVWA instance
 
-11. Ethics
+Security Level: Low (for demonstration purposes)
 
-All testing was performed only against a locally installed DVWA
-instance created specifically for security training.
+Database: MariaDB
 
-No real website, external server, database, or unauthorized system was
-targeted.
+Purpose: Security education and awareness
+
+Ethics Statement
+⚠️ WARNING: This demonstration was performed ONLY on a locally installed DVWA instance created specifically for security training purposes.
+
+Ethical Guidelines:
+
+Never attempt SQL injection on real websites
+
+Always have explicit permission for security testing
+
+Use such knowledge only for defensive purposes
+
+Report vulnerabilities responsibly if found in production systems
+
+Additional Resources
+PortSwigger Web Security Academy - Comprehensive SQL Injection guide
+
+OWASP SQL Injection Prevention Cheat Sheet
+
+DVWA GitHub Repository
+
+Conclusion
+This demonstration clearly shows how SQL Injection can expose sensitive data when applications fail to properly handle user input. The vulnerability exists primarily due to:
+
+Lack of input validation
+
+Direct concatenation in SQL queries
+
+Absence of parameterized queries
+
+Key Takeaway: Always treat user input as data, not code. Using prepared statements is the most effective and straightforward solution to prevent SQL Injection vulnerabilities.
+
