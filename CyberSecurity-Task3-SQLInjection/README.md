@@ -207,3 +207,6 @@ Absence of parameterized queries
 
 Key Takeaway: Always treat user input as data, not code. Using prepared statements is the most effective and straightforward solution to prevent SQL Injection vulnerabilities.
 
+screenshots
+<img width="929" height="436" alt="01_sql_injection_basic" src="https://github.com/user-attachments/assets/6802969c-e390-43f6-a468-5b00298f0f14" />
+<img width="664" height="439" alt="02_sql_injection_payload2" src="https://github.com/user-attachments/assets/5b4ba4df-b606-4b93-9760-8e9bddd0253b" />
